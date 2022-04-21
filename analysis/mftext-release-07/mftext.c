@@ -1,12 +1,13 @@
 /*
  * mftext
- * 
+ *
  * Convert a MIDI file to verbose text.
  */
-
+#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "midifile.h"
 
 void prtime();
@@ -23,9 +24,7 @@ long tempo = 500000; /* the default tempo is 120 beats/minute */
 
 int filegetc()
 {
-    int x;
-    x = getc(F);
-	return(x);
+	return(getc(F));
 }
 
 int main(argc,argv)
@@ -88,8 +87,12 @@ char *mode;
 	const char *errmess;
 
 	if ( (f=fopen(name,mode)) == NULL ) {
- 		fprintf(stderr,"*** ERROR in mftext *** Cannot open '%s'!\n",name);
- 		perror("Reason");
+		(void) fprintf(stderr,"*** ERROR *** Cannot open '%s'!\n",name);
+		if ( errno <= sys_nerr )
+			errmess = sys_errlist[errno];
+		else
+			errmess = "Unknown error!";
+		(void) fprintf(stderr,"************* Reason: %s\n",errmess);
 		exit(1);
 	}
 	return(f);
@@ -143,12 +146,12 @@ void txt_noteon(chan,pitch,vol)
 	  davynote[n].offtime=newtime;
 	  davynote[n].pitch=pitch;
 	  n++;
-	  /*printf("Note %6d %6d %2d\n", davypitch[pitch], (int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)), pitch);  */
+	  printf("Note %6d %6d %2d\n", davypitch[pitch], (int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)), pitch);
 	}
 	davypitch[pitch]=newtime;
 	/*
         printf("Note-on ");
-	printf("%d ",(int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)));  
+	printf("%d ",(int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)));
 	printf("%d\n",pitch); */
 
 }
@@ -168,7 +171,7 @@ void txt_noteoff(chan,pitch,vol)
 	}
 
   /*        printf("Note-off ");
-	printf("%d ", (int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)));  
+	printf("%d ", (int) (1000 * mf_ticks2sec(Mf_currtime,division,tempo)));
 	printf("%d\n",pitch); */
 
 }
